@@ -21,4 +21,4 @@ Semantic search demonstration over quantamagazine.org content.
 `mvn package -P index`
 3. To run the server
 `mvn package -P server`
-4. Open a browser and go to `https://localhost:8080`
+4. Open a browser and go to `http://localhost:8080`
