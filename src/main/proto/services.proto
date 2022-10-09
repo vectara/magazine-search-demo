@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+import "admin.proto";
+
+import "common.proto";
+import "indexing.proto";
+import "serving.proto";
+import "status.proto";
+import "google/api/annotations.proto";
+
+option java_package = "com.vectara";
+option java_outer_classname = "ServiceProtos";
+
+option go_package = "vectara.com/public/proto/services";
+
+package com.vectara;
+
+// Request to index a document.
+message IndexDocumentRequest {
+  int64 customer_id = 1;
+  int64 corpus_id = 2;
+  com.vectara.indexing.Document document = 3;
+}
+
+message IndexDocumentResponse {
+  // If ALREADY_EXISTS, it means the document was already indexed, and no new quota was consumed.
+  Status status = 1;
+
+  // The storage quota needed for the document indexed in the request.
+  // If "status" is ALREADY_EXISTS, it means that the document was already in the index prior to
+  // this request. In such cases, quota is not consumed again and the value in this field
+  // represents the quota consumed when the document was indexed the first time.
+  StorageQuota quota_consumed = 2;
+}
+
+service IndexService {
+  rpc Index(IndexDocumentRequest) returns (IndexDocumentResponse) {
+    option (google.api.http) = {
+      post: "/v1/index"
+      body: "*"
+    };
+  }
+
+  rpc Delete(DeleteDocumentRequest) returns (DeleteDocumentResponse) {
+    option (google.api.http) = {
+      post: "/v1/delete-doc"
+      body: "*"
+    };
+  }
+}
+
+service QueryService {
+  // A standard single-request, single-response endpoint designed for high performance.
+  rpc Query(com.vectara.serving.BatchQueryRequest)
+          returns (com.vectara.serving.BatchQueryResponse) {
+    option (google.api.http) = {
+      post: "/v1/query"
+      body: "*"
+    };
+  }
+  // A streamed response interface when lower latency is absolutely critical.
+  rpc StreamQuery(com.vectara.serving.BatchQueryRequest)
+          returns (stream com.vectara.serving.ResponseSet) {
+    option (google.api.http) = {
+      post: "/v1/stream-query"
+      body: "*"
+    };
+  }
+}
+
+
+service AdminService {
+  rpc CreateCorpus(com.vectara.admin.CreateCorpusRequest) returns (com.vectara.admin.CreateCorpusResponse){
+    option (google.api.http) = {
+      post: "/v1/create-corpus"
+      body: "*"
+    };
+  }
+
+  rpc DeleteCorpus(com.vectara.admin.DeleteCorpusRequest) returns (com.vectara.admin.DeleteCorpusResponse){
+    option (google.api.http) = {
+      post: "/v1/delete-corpus"
+      body: "*"
+    };
+  }
+
+  rpc ResetCorpus(com.vectara.admin.ResetCorpusRequest) returns (com.vectara.admin.ResetCorpusResponse){
+    option (google.api.http) = {
+      post: "/v1/reset-corpus"
+      body: "*"
+    };
+  }
+  
+  rpc ListCorpora(com.vectara.admin.ListCorporaRequest)
+      returns (com.vectara.admin.ListCorporaResponse) {
+    option (google.api.http) = {
+      post: "/v1/list-corpora"
+      body: "*"
+    };
+  }
+
+}

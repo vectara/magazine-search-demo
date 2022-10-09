@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_package = "com.vectara.indexing";
+option java_outer_classname = "CustomDimProtos";
+
+option go_package = "vectara.com/public/proto/customdim";
+
+package com.vectara.indexing;
+
+// The value of a custom dimension. A valid list of custom dimensions is defined ahead of time for a corpus.
+message CustomDimension {
+  // The name of the dimension.
+  string name = 1;
+  // The value of the dimension.
+  double value = 2;
+}

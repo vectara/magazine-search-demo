@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option java_package = "com.vectara.examples.quanta";
+option java_outer_classname = "QuantaProtos";
+
+package com.vectara.integrations.quanta;
+
+message SearchResults {
+  repeated WebDoc docs = 1;
+  repeated Question common_questions = 4;
+}
+
+message Question {
+  string question = 1;
+  string answer = 2;
+  string source_title = 3;
+  string source_url = 4;
+  string authority = 5; 
+}
+
+message ContentPanel {
+  string content = 1;
+  int64 retrieval_date = 2;
+  string authority = 3;
+  string authority_url = 4;
+}
+
+message Crumb {
+  string display = 1;
+  string url = 2;
+}
+
+message WebDoc {
+  string url = 1;
+  string text_fragment = 2;
+  string image_url = 3;
+  string title = 4;
+  string author = 5;
+  string authority = 6;
+  int64 date = 7;                   // Date of the document
+  string site_category = 8;         // Top-level site category.
+  repeated Crumb breadcrumb = 9;    // Document structure breadcrumb
+  repeated string tags = 10;
+  repeated Section sections = 11;
+}
+
+message Section {
+  string text = 1;
+  string pre = 2;
+  string post = 3;
+}

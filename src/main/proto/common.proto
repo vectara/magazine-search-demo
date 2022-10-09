@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option java_package = "com.vectara";
+option java_outer_classname = "CommonProtos";
+
+option go_package = "vectara.com/public/proto/common";
+
+package com.vectara;
+
+// Request to delete a document from an index.
+message DeleteDocumentRequest {
+  int64 customer_id = 1;
+  int64 corpus_id = 2;
+  string document_id = 3;
+}
+
+message DeleteDocumentResponse {
+}
+
+// Encapsulates storage quota consumed by indexed documents.
+// NextId: 3
+message StorageQuota {
+  // The number of chars from the document that consumed the storage quota.
+  int64 num_chars = 1;
+  // The number of chars in the metadata of the document that consumed the storage quota.
+  int64 num_metadata_chars = 2;
+}

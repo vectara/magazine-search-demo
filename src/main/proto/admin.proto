@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+import "status.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "vectara.com/public/proto/admin";
+
+option java_package = "com.vectara.admin";
+option java_outer_classname = "AdminProtos";
+
+package com.vectara.admin;
+
+/******************************************************************************
+  Corpus Management (add, remove corpora, star a corpus)
+ ******************************************************************************/
+
+message Corpus {
+  uint32 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 dt_provision = 4;
+  bool enabled = 5;
+  bool swap_qenc = 6;
+  bool swap_ienc = 7;
+  bool textless = 8;
+  // Encryption is on by default and cannot be turned off.
+  bool encrypted = 9;
+
+  uint64 encoder_id = 10;
+  uint32 metadata_max_bytes = 11;
+  string faiss_index_type = 12;
+
+  repeated Dimension custom_dimensions = 13;
+  repeated FilterAttribute filter_attributes = 14;
+}
+
+message Dimension {
+  string name = 1;
+  string description = 2;
+  double serving_default = 3;
+  double indexing_default = 4;
+}
+
+// Defines metadata fields that can be used in predicate queries.
+message FilterAttribute {
+  string name = 5;                     // Name, as seen in metadata
+  string description = 10;             // Optional description
+  bool indexed = 15;                   // Index for maximum query speed.
+  FilterAttributeType type = 20;       // Type of the attribute
+  FilterAttributeLevel level = 25;     // Document or part level?
+}
+
+enum FilterAttributeType {
+  FILTER_ATTRIBUTE_TYPE__UNDEFINED = 0;
+  FILTER_ATTRIBUTE_TYPE__INTEGER = 5;
+  FILTER_ATTRIBUTE_TYPE__INTEGER_LIST = 10;
+  FILTER_ATTRIBUTE_TYPE__REAL = 15;
+  FILTER_ATTRIBUTE_TYPE__REAL_LIST = 20;
+  FILTER_ATTRIBUTE_TYPE__TEXT = 25;
+  FILTER_ATTRIBUTE_TYPE__TEXT_LIST = 30;
+}
+
+enum FilterAttributeLevel {
+  FILTER_ATTRIBUTE_LEVEL__UNDEFINED = 0;
+  FILTER_ATTRIBUTE_LEVEL__DOCUMENT = 5;         // Document-level attribute
+  FILTER_ATTRIBUTE_LEVEL__DOCUMENT_PART = 10;   // Part-level attribute
+}
+
+message CreateCorpusRequest {
+  Corpus corpus = 1;
+}
+
+message CreateCorpusResponse {
+  uint32 corpus_id = 1;
+  Status status = 2;
+}
+
+message DeleteCorpusRequest {
+  uint64 customer_id = 1;
+  uint64 corpus_id = 2;
+}
+
+message DeleteCorpusResponse {
+  Status status = 1;
+}
+
+message ResetCorpusRequest {
+  uint64 customer_id = 1;
+  uint64 corpus_id = 2;
+}
+
+message ResetCorpusResponse {
+  Status status = 1;
+}
+
+message ListCorporaRequest {
+  string filter = 2;         // A regex to match corpora against.
+  uint32 num_results = 4;    // Maximum results to return
+  bytes page_key = 5;
+}
+
+message ListCorporaResponse {
+  repeated Corpus corpus = 1;
+
+  // A key that is passed into a subsequent result in order to
+  // retrieve the next page of results.
+  bytes page_key = 2;
+  Status status = 1000;
+}
+
+

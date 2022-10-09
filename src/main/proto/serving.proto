@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+import "status.proto";
+
+option java_package = "com.vectara.serving";
+option java_outer_classname = "ServingProtos";
+
+option go_package = "vectara.com/public/proto/serving";
+
+package com.vectara.serving;
+
+// Defined the weight of a custom dimension at query time.
+message CustomDimension {
+  string name = 1;
+  double weight = 2;
+}
+
+message CorpusKey {
+  uint32 customer_id = 5;
+  uint32 corpus_id = 10;
+
+  // Semantics controls the interpretation of the query string by the
+  // server, and can be used to override the default semantics assigned
+  // in the corpus definition.
+  enum Semantics {
+    DEFAULT = 0;                  // Use corpus-assigned semantics (most common).
+    QUERY = 1;                    // Use query semantics (common).
+    RESPONSE = 2;                 // Use response semantics (rare).
+  }
+  Semantics semantics = 15;
+
+  repeated CustomDimension dim = 20;  // Weights on custom dimensions for the corpus.
+
+  string metadata_filter = 25;
+}
+
+message QueryRequest {
+  string query = 5;
+  string query_context = 10;
+
+  uint32 start = 15;              // The start position in the result set.
+  uint32 num_results = 20;        // The number of results to return.
+  repeated CorpusKey corpus_key = 25;
+
+  // Configuration options for reranking.
+  message RerankingConfig {
+    uint32 reranker_id = 5;
+  }
+  RerankingConfig reranking_config = 30;
+}
+
+message Attribute {
+  string name = 5;
+  string value = 10;
+}
+
+message Response {
+  string text = 5;
+  float score = 10;               // Score used for ranking results.
+  repeated Attribute metadata = 20;
+  uint32 document_index = 25;     // Pointer to the document in the ResponseSet.
+  CorpusKey corpus_key = 30;
+}
+
+message ResponseSet {
+  repeated Response response = 5;
+  repeated Status status = 10;    // Potentially multiple warnings.
+
+  message Document {
+    string id = 5;
+    repeated Attribute metadata = 10;
+  }
+  repeated Document document = 15;
+}
+
+message BatchQueryRequest {
+  repeated QueryRequest query = 5;
+}
+
+message BatchQueryResponse {
+  repeated ResponseSet response_set = 5;
+
+  repeated Status status = 1000;
+  PerformanceMetrics metrics = 1005;
+}
+
+// Basic performance metrics that can be attached to a server response.
+message PerformanceMetrics {
+  uint32 query_encode_ms = 5;
+  uint32 retrieval_ms = 10;
+  uint32 userdata_retrieval_ms = 15;
+  uint32 rerank_ms = 20;
+}
