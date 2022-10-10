@@ -48,6 +48,9 @@ public class QuantaCrawler {
       articleURLs.add(articleURL);
       if (articleURLs.size() >= MAX_ARTICLES) break;
     }
+    Path articlesDir = Path.of("src", "main", "resources", "articles");
+    System.out.println("Articles directory " + articlesDir);
+    Files.createDirectories(articlesDir);
     final ExecutorService es = Executors.newFixedThreadPool(10);
     final AtomicInteger counter = new AtomicInteger();
     final QuantaIndexService quantaIndexService = new QuantaIndexService(args);
@@ -59,7 +62,7 @@ public class QuantaCrawler {
             IndexingProtos.Document indexDoc = toDocument(quantaArticle);
             String filename = quantaArticle.docId() + ".json";
             quantaIndexService.index(indexDoc);
-            store(filename, indexDoc);
+            store(articlesDir, filename, indexDoc);
             counter.incrementAndGet();
           }
         } catch (Exception e) {
@@ -71,14 +74,10 @@ public class QuantaCrawler {
     System.out.println("total " + articleURLs.size() + " completed " + counter);
   }
 
-  public static File store(String filename, IndexingProtos.Document indexDoc) throws Exception {
-    Path articlesPath = Path.of("server", "src", "main", "resources", "articles");
-    Files.createDirectories(articlesPath);
-    Path path = Path.of("server", "src", "main", "resources", "articles", filename);
-    File file = path.toFile();
+  public static void store(Path articlesDir, String filename, IndexingProtos.Document indexDoc) throws Exception {
+    Path articlePath = Path.of(articlesDir.toString(), filename);
     String json = JsonFormat.printer().print(indexDoc);
-    Files.writeString(path, json, Charset.defaultCharset());
-    return file;
+    Files.writeString(articlePath, json, Charset.defaultCharset());
   }
 
   public static IndexingProtos.Document toDocument(QuantaArticle article) {
