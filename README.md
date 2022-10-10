@@ -16,9 +16,13 @@ Semantic search demonstration over quantamagazine.org content.
 4. Also note down your Vectara customer/account ID and the Corpus ID (of the corpus you want to index data to, or query.)
 
 ## How to run the demo locally
-1. Update the configuration file at `src/main/resources/vectara.properties`
+1. Update the configuration file at [src/main/resources/vectara.properties](src/main/resources/vectara.properties)
 2. To crawl and index Quanta Magazine articles for year 2020 (you only need to do this once).
-`mvn package -P index`
+
+&emsp;`mvn package -P index`
+
 3. To run the server
-`mvn package -P server`
+
+&emsp;`mvn package -P server`
+
 4. Open a browser and go to `http://localhost:8080`
