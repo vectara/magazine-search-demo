@@ -26,3 +26,8 @@ Semantic search demonstration over quantamagazine.org content.
 &emsp;`mvn package -P server`
 
 4. Open a browser and go to `http://localhost:8080`
+
+<p align="left">
+  <img src="src/main/resources/magazine-search-demo-screenshot.png" width="500" title="Magazine Search Demo UI">
+</p>
+
