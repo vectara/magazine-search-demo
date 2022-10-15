@@ -1,5 +1,5 @@
 /**
- * Autocompletion support. (C) 2020, ZIR AI, Inc.
+ * Autocompletion support. (C) 2022, Vectara, Inc.
  */
 
 class Complete { 
