@@ -28,7 +28,7 @@ public class QuantaIndexService {
         args.auth_app_secret
     );
     ManagedChannel indexingChannel = NettyChannelBuilder
-        .forAddress("indexing.vectara.dev", 443)
+        .forAddress("indexing.vectara.io", 443)
         .sslContext(GrpcSslContexts.forClient()
             .trustManager((File) null)
             .build())

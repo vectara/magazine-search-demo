@@ -78,7 +78,7 @@ public class QuantaServe {
         args.auth_app_secret);
     // Setup the connection to the Vectara Platform.
     this.servingChannel = NettyChannelBuilder
-        .forAddress("serving.vectara.dev", 443)
+        .forAddress("serving.vectara.io", 443)
         .sslContext(GrpcSslContexts.forClient()
             .trustManager((File) null)
             .build())
