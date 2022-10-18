@@ -169,7 +169,7 @@ public class QueryServlet extends HttpServlet {
     titleQuery.addCorpusKey(
         CorpusKey.newBuilder()
             .setCorpusId(corpusId)
-            .setMetadataFilter("part.is_title=true")
+            .setMetadataFilter("part.is_title=1")
     );
     servingRequest.addQuery(titleQuery);
     final QueryRequest.Builder nonTitleQuery = QueryRequest.newBuilder();
