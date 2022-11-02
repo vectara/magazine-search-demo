@@ -1,4 +1,4 @@
-package com.vectara.examples.salpha.util;
+package com.vectara.examples.quanta.util;
 
 import com.vectara.StatusProtos.Status;
 

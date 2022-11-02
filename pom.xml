@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.vectara.examples</groupId>
-    <artifactId>capgroup</artifactId>
+    <artifactId>quanta-magazine</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>Seeking Alpha Demo</name>
+    <name>Quanta Magazine Demo</name>
     <description>
-        Semantic search for seeking alpha.
+        Semantic search demonstration over quantamagazine.org content.
     </description>
     <properties>
         <java.version>11</java.version>
@@ -31,10 +31,10 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.1</version>
                 <configuration>
-                    <finalName>seeking-alpha</finalName>
+                    <finalName>quanta-magazine</finalName>
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>com.vectara.examples.salpha.AlphaServe</mainClass>
+                            <mainClass>com.vectara.examples.quanta.QuantaServe</mainClass>
                         </transformer>
                     </transformers>
                 </configuration>
@@ -212,7 +212,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.vectara.examples.salpha.QuantaCrawler</mainClass>
+                                    <mainClass>com.vectara.examples.quanta.QuantaCrawler</mainClass>
                                 </configuration>
                             </execution>
                         </executions>
@@ -235,7 +235,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.vectara.examples.salpha.AlphaServe</mainClass>
+                                    <mainClass>com.vectara.examples.quanta.QuantaServe</mainClass>
                                 </configuration>
                             </execution>
                         </executions>

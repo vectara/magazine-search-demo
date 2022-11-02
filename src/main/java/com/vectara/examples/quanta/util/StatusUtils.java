@@ -1,4 +1,4 @@
-package com.vectara.examples.salpha.util;
+package com.vectara.examples.quanta.util;
 
 import com.google.protobuf.TextFormat;
 import com.vectara.StatusProtos.Status;

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-option java_package = "com.vectara.examples.salpha";
-option java_outer_classname = "AlphaProtos";
+option java_package = "com.vectara.examples.quanta";
+option java_outer_classname = "QuantaProtos";
 
 package com.vectara.integrations.quanta;
 
