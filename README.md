@@ -1,6 +1,6 @@
 # README
 
-Semantic search demonstration over quantamagazine.org content.
+Semantic search demonstration over financial analysis content.
 
 ## Requirements
 1. JDK 11 or above
@@ -8,12 +8,14 @@ Semantic search demonstration over quantamagazine.org content.
 
 ## Before you run
 1. Create an account and a corpus in [Vectara Console](https://console.vectara.com).
-2. Go to [Vectara Console Authentication](https://console.vectara.com/console/authentication) menu and create an App Client
+2. Go to [Vectara Console Authentication](https://console.vectara.com/console/authentication) menu
+   and create an App Client
 3. Note down the following three things from App Client page in Console.
     1. App Client ID
     2. App Client Secret
     3. Auth URL (This is available near the top of the page)
-4. Also note down your Vectara customer/account ID and the Corpus ID (of the corpus you want to index data to, or query.)
+4. Also note down your Vectara customer/account ID and the Corpus ID (of the corpus you want to
+   index data to, or query.)
 
 ## How to run the demo locally
 1. Update the configuration file at [src/main/resources/vectara.properties](src/main/resources/vectara.properties)
@@ -27,7 +29,4 @@ Semantic search demonstration over quantamagazine.org content.
 
 4. Open a browser and go to `http://localhost:8080`
 
-<p align="left">
-  <img src="src/main/resources/magazine-search-demo-screenshot.png" width="500" title="Magazine Search Demo UI">
-</p>
 

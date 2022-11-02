@@ -24,6 +24,7 @@ import com.vectara.examples.salpha.util.StatusUtils;
 import com.vectara.examples.salpha.util.TokenResponse;
 import com.vectara.examples.salpha.util.VectaraCallCredentials;
 import com.vectara.examples.salpha.util.VectaraCallCredentials.AuthType;
+import com.vectara.indexing.IndexingProtos;
 import com.vectara.indexing.IndexingProtos.Section;
 import com.vectara.serving.ServingProtos.Attribute;
 import com.vectara.serving.ServingProtos.BatchQueryRequest;
@@ -45,6 +46,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServlet;
@@ -64,28 +66,27 @@ public class QueryServlet extends HttpServlet {
   private int corpusId;
   private QueryServiceBlockingStub vectaraClient;
   private ExpiringMemoizingSupplier<StatusOr<TokenResponse>> tokenSupplier;
-  private Map<String, com.vectara.indexing.IndexingProtos.Document> documents;
+  private DocumentIndex docIndex;
   private Map<String, String> docCategory;
 
   public QueryServlet(
       long customerId,
       int corpusId,
-      Map<String, com.vectara.indexing.IndexingProtos.Document> documents,
+      DocumentIndex docIndex,
       JwtFetcher fetcher,
       QueryServiceBlockingStub queryService) throws IOException {
     this.customerId = customerId;
     this.corpusId = corpusId;
     this.vectaraClient = queryService;
-    this.documents = documents;
+    this.docIndex = docIndex;
     this.docCategory = Maps.newHashMap();
     Gson gson = new Gson();
-    for (String key : documents.keySet()) {
-      com.vectara.indexing.IndexingProtos.Document d = documents.get(key);
+    for (var d : docIndex.all()) {
       @SuppressWarnings("unchecked")
       Map<String, Object> metadata = gson.fromJson(d.getMetadataJson(), Map.class);
       Object value = metadata.get("category");
       if (value instanceof String) {
-        docCategory.put(key, (String) value);
+        docCategory.put(d.getDocumentId(), (String) value);
       }
     }
     this.tokenSupplier = new ExpiringMemoizingSupplier<StatusOr<TokenResponse>>(
@@ -237,7 +238,7 @@ public class QueryServlet extends HttpServlet {
       result.servingDoc = titleSet.getDocument(result.title.getDocumentIndex());
       result.titleRank = i + 1;
       result.bodyRank = bodySet.getResponseCount() + 1; // Initial value
-      String id = massageId(result.servingDoc.getId());
+      String id = result.servingDoc.getId();
       result.fullDoc = getFullDoc(id);
       if (result.fullDoc != null) {
         resultMap.put(id, result);
@@ -255,7 +256,7 @@ public class QueryServlet extends HttpServlet {
     for (int i = 0; i < bodySet.getResponseCount(); i++) {
       Response r = bodySet.getResponse(i);
       Document d = bodySet.getDocument(r.getDocumentIndex());
-      String id = massageId(d.getId());
+      String id = d.getId();
       if (resultMap.containsKey(id)) {
         Result result = resultMap.get(id);
         if (result.body == null) {  // Only register the highest scoring snippet
@@ -269,7 +270,7 @@ public class QueryServlet extends HttpServlet {
         result.servingDoc = d;
         result.titleRank = titleSet.getResponseCount() + 1;
         result.bodyRank = i + 1;
-        id = massageId(result.servingDoc.getId());
+        id = result.servingDoc.getId();
         result.fullDoc = getFullDoc(id);
         if (result.fullDoc != null) {
           resultMap.put(id, result);
@@ -305,7 +306,7 @@ public class QueryServlet extends HttpServlet {
       result.setTitle(stripQuantaSuffix(r.fullDoc.getTitle()));
       result.setUrl(getUrl(r.servingDoc));
       result.setAuthority("alpha-vectara.com");
-      result.setSiteCategory(getCategory(massageId(r.fullDoc.getDocumentId())));
+      result.setSiteCategory(getCategory(r.fullDoc.getDocumentId()));
       var timeStatus = getPublishedTimestamp(r.servingDoc);
       if (timeStatus.ok()) {
         result.setDate(timeStatus.get());
@@ -321,7 +322,7 @@ public class QueryServlet extends HttpServlet {
       setTags(result, r.servingDoc);
       var sec = AlphaProtos.Section.newBuilder();
       if (r.body == null || isTitleMatch(r.body)) {
-        sec.setText(r.fullDoc.getSection(0).getText());
+        sec.setText(dfsExtractText(r.fullDoc));
       } else {
         var section = getSection(r.fullDoc, r.body);
         String body = section == null ? "" : section.getText();
@@ -337,7 +338,7 @@ public class QueryServlet extends HttpServlet {
         result.setTextFragment(makeFragment(r.body.getText()));
         sec.setPre(getPre(r.body, offset, body));
         sec.setPost(getPost(r.body, offset, body));
-        setBreadcrumb(result, section);
+        setBreadcrumb(result, r.fullDoc.getDocumentId(), section);
       }
       result.addSections(sec.build());
       docs.add(result.build());
@@ -349,19 +350,28 @@ public class QueryServlet extends HttpServlet {
   }
 
   /**
+   * Run a DFS search on the full document, extract the first text we encounter.
+   */
+  private String dfsExtractText(IndexingProtos.Document fullDoc) {
+    Stack<Section> sections = new Stack<>();
+    sections.addAll(Lists.reverse(fullDoc.getSectionList()));
+    while (!sections.isEmpty()) {
+      Section s = sections.pop();
+      if (!Strings.isNullOrEmpty(s.getText())) {
+        return s.getText();
+      }
+      sections.addAll(Lists.reverse(s.getSectionList()));
+    }
+    return "";
+  }
+
+  /**
    * Generate a text fragment.
    *
    * @see "https://web.dev/text-fragments/"
    */
   private String makeFragment(String snippet) {
     return "#:~:text=" + UrlEscapers.urlFragmentEscaper().escape(snippet);
-  }
-
-  /**
-   * Work around a bug in the indexing layer.
-   */
-  private String massageId(String id) {
-    return Files.getNameWithoutExtension(id);
   }
 
   private boolean isTitleMatch(Response body) {
@@ -441,9 +451,9 @@ public class QueryServlet extends HttpServlet {
 
   @Nullable
   private com.vectara.indexing.IndexingProtos.Document getFullDoc(String docId) {
-    com.vectara.indexing.IndexingProtos.Document article = documents.get(docId);
+    com.vectara.indexing.IndexingProtos.Document article = docIndex.get(docId);
     if (article == null) {
-      article = documents.get(Files.getNameWithoutExtension(docId));
+      article = docIndex.get(Files.getNameWithoutExtension(docId));
       if (article == null) {
         LOG.atWarning().log(
             "Document %s does not exist in cache. JAR and index are out of sync.", docId);
@@ -452,9 +462,12 @@ public class QueryServlet extends HttpServlet {
     return article;
   }
 
-  private void setBreadcrumb(WebDoc.Builder result, Section section) {
-    if (section != null && !Strings.isNullOrEmpty(section.getTitle())) {
-      result.addBreadcrumb(Crumb.newBuilder().setDisplay(section.getTitle()));
+  private void setBreadcrumb(WebDoc.Builder result, String docId, Section section) {
+    if (section != null) {
+      String title = docIndex.getTitle(docId, section.getId());
+      if (title != null) {
+        result.addBreadcrumb(Crumb.newBuilder().setDisplay(title));
+      }
     }
   }
 
@@ -486,17 +499,11 @@ public class QueryServlet extends HttpServlet {
         return a.getValue();
       }
     }
-    return "https://www.quantamagazine.org";
+    return "https://www.vectara.com";
   }
 
   private Section getSection(com.vectara.indexing.IndexingProtos.Document article, Response r) {
-    int section = getSection(r);
-    for (Section s : article.getSectionList()) {
-      if (s.getId() == section) {
-        return s;
-      }
-    }
-    return null;
+    return docIndex.getSection(article.getDocumentId(), getSection(r));
   }
 
   /**
