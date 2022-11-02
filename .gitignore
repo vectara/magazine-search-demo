@@ -37,3 +37,6 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
+# Articles that are served by the demo server.
+src/main/resources/articles/*

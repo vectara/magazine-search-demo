@@ -1,4 +1,4 @@
-package com.vectara.examples.quanta.util;
+package com.vectara.examples.salpha.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;

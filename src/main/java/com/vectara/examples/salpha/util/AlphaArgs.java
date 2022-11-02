@@ -1,4 +1,4 @@
-package com.vectara.examples.quanta.util;
+package com.vectara.examples.salpha.util;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.converters.IntegerConverter;
@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class VectaraArgs extends HttpArgs {
-  public VectaraArgs() {
+public class AlphaArgs extends HttpArgs {
+  public AlphaArgs() {
     Properties properties = loadVectaraConfig();
     if (properties != null) {
       auth_auth_url = properties.getProperty("vectara.auth.url");

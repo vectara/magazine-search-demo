@@ -1,4 +1,4 @@
-package com.vectara.examples.quanta;
+package com.vectara.examples.salpha;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
@@ -14,16 +14,16 @@ import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.JsonFormat.Printer;
 import com.vectara.QueryServiceGrpc.QueryServiceBlockingStub;
 import com.vectara.StatusProtos.StatusCode;
-import com.vectara.examples.quanta.QuantaProtos.Crumb;
-import com.vectara.examples.quanta.QuantaProtos.WebDoc;
-import com.vectara.examples.quanta.QuantaProtos.WebDoc.Builder;
-import com.vectara.examples.quanta.util.ExpiringMemoizingSupplier;
-import com.vectara.examples.quanta.util.JwtFetcher;
-import com.vectara.examples.quanta.util.StatusOr;
-import com.vectara.examples.quanta.util.StatusUtils;
-import com.vectara.examples.quanta.util.TokenResponse;
-import com.vectara.examples.quanta.util.VectaraCallCredentials;
-import com.vectara.examples.quanta.util.VectaraCallCredentials.AuthType;
+import com.vectara.examples.salpha.AlphaProtos.Crumb;
+import com.vectara.examples.salpha.AlphaProtos.WebDoc;
+import com.vectara.examples.salpha.AlphaProtos.WebDoc.Builder;
+import com.vectara.examples.salpha.util.ExpiringMemoizingSupplier;
+import com.vectara.examples.salpha.util.JwtFetcher;
+import com.vectara.examples.salpha.util.StatusOr;
+import com.vectara.examples.salpha.util.StatusUtils;
+import com.vectara.examples.salpha.util.TokenResponse;
+import com.vectara.examples.salpha.util.VectaraCallCredentials;
+import com.vectara.examples.salpha.util.VectaraCallCredentials.AuthType;
 import com.vectara.indexing.IndexingProtos.Section;
 import com.vectara.serving.ServingProtos.Attribute;
 import com.vectara.serving.ServingProtos.BatchQueryRequest;
@@ -33,10 +33,6 @@ import com.vectara.serving.ServingProtos.QueryRequest;
 import com.vectara.serving.ServingProtos.Response;
 import com.vectara.serving.ServingProtos.ResponseSet;
 import com.vectara.serving.ServingProtos.ResponseSet.Document;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -50,6 +46,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author aahmad
@@ -135,7 +135,7 @@ public class QueryServlet extends HttpServlet {
       StatusOr<List<WebDoc>> docsOr = vectaraSearch(
           query,
           numResults,
-          /*rrf_k = */ 0,
+          /*rrf_k = */ 60,
           resp,
           fetch
       );
@@ -206,7 +206,7 @@ public class QueryServlet extends HttpServlet {
     if (!docsOr.ok()) {
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     } else {
-      var results = QuantaProtos.SearchResults.newBuilder()
+      var results = AlphaProtos.SearchResults.newBuilder()
           .addAllDocs(docsOr.get());
       Printer printer = JsonFormat.printer()
           .includingDefaultValueFields();
@@ -304,7 +304,7 @@ public class QueryServlet extends HttpServlet {
       WebDoc.Builder result = WebDoc.newBuilder();
       result.setTitle(stripQuantaSuffix(r.fullDoc.getTitle()));
       result.setUrl(getUrl(r.servingDoc));
-      result.setAuthority("quantamagazine.org");
+      result.setAuthority("alpha-vectara.com");
       result.setSiteCategory(getCategory(massageId(r.fullDoc.getDocumentId())));
       var timeStatus = getPublishedTimestamp(r.servingDoc);
       if (timeStatus.ok()) {
@@ -319,7 +319,7 @@ public class QueryServlet extends HttpServlet {
         result.setImageUrl(image);
       }
       setTags(result, r.servingDoc);
-      var sec = QuantaProtos.Section.newBuilder();
+      var sec = AlphaProtos.Section.newBuilder();
       if (r.body == null || isTitleMatch(r.body)) {
         sec.setText(r.fullDoc.getSection(0).getText());
       } else {

@@ -1,4 +1,4 @@
-package com.vectara.examples.quanta.util;
+package com.vectara.examples.salpha.util;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;

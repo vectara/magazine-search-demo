@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.vectara.examples</groupId>
-    <artifactId>quanta-magazine</artifactId>
+    <artifactId>capgroup</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>Quanta Magazine Demo</name>
+    <name>Seeking Alpha Demo</name>
     <description>
-        Semantic search demonstration over quantamagazine.org content.
+        Semantic search for seeking alpha.
     </description>
     <properties>
         <java.version>11</java.version>
@@ -31,10 +31,10 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.1</version>
                 <configuration>
-                    <finalName>quanta-magazine</finalName>
+                    <finalName>seeking-alpha</finalName>
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>com.vectara.examples.quanta.QuantaServe</mainClass>
+                            <mainClass>com.vectara.examples.salpha.AlphaServe</mainClass>
                         </transformer>
                     </transformers>
                 </configuration>
@@ -212,7 +212,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.vectara.examples.quanta.QuantaCrawler</mainClass>
+                                    <mainClass>com.vectara.examples.salpha.QuantaCrawler</mainClass>
                                 </configuration>
                             </execution>
                         </executions>
@@ -235,7 +235,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.vectara.examples.quanta.QuantaServe</mainClass>
+                                    <mainClass>com.vectara.examples.salpha.AlphaServe</mainClass>
                                 </configuration>
                             </execution>
                         </executions>

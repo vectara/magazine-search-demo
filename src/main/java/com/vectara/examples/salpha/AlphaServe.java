@@ -1,4 +1,4 @@
-package com.vectara.examples.quanta;
+package com.vectara.examples.salpha;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.internal.Maps;
@@ -11,10 +11,10 @@ import com.vectara.QueryServiceGrpc;
 import com.vectara.QueryServiceGrpc.QueryServiceBlockingStub;
 import com.vectara.StatusProtos.Status;
 import com.vectara.StatusProtos.StatusCode;
-import com.vectara.examples.quanta.util.HttpConfig;
-import com.vectara.examples.quanta.util.JwtFetcher;
-import com.vectara.examples.quanta.util.StatusUtils;
-import com.vectara.examples.quanta.util.VectaraArgs;
+import com.vectara.examples.salpha.util.HttpConfig;
+import com.vectara.examples.salpha.util.JwtFetcher;
+import com.vectara.examples.salpha.util.StatusUtils;
+import com.vectara.examples.salpha.util.AlphaArgs;
 import com.vectara.indexing.IndexingProtos.Document;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.GrpcSslContexts;
@@ -41,12 +41,12 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.vectara.examples.quanta.util.StatusUtils.ok;
+import static com.vectara.examples.salpha.util.StatusUtils.ok;
 
 /**
- * Provide search services on Quanta Magazine.
+ * Provide search services for seeking alpha.
  */
-public class QuantaServe {
+public class AlphaServe {
   private static final FluentLogger LOG;
 
   static {
@@ -56,12 +56,12 @@ public class QuantaServe {
     LOG = FluentLogger.forEnclosingClass();
   }
 
-  private VectaraArgs args;
+  private AlphaArgs args;
   private ManagedChannel servingChannel;
   private QueryServiceBlockingStub syncStub;
   private Map<String, com.vectara.indexing.IndexingProtos.Document> documents;
 
-  public QuantaServe(VectaraArgs args) {
+  public AlphaServe(AlphaArgs args) {
     this.args = args;
   }
 
@@ -105,7 +105,7 @@ public class QuantaServe {
                 jwt_fetcher,
                 syncStub)), "/query");
     // Setup static file serving.
-    URL webRoot = QuantaServe.class.getClassLoader().getResource("web");
+    URL webRoot = AlphaServe.class.getClassLoader().getResource("web");
     coreServletHandler.setBaseResource(Resource.newResource(webRoot));
     ServletHolder holderPwd =
         new ServletHolder("default", new DefaultServlet());
@@ -175,8 +175,8 @@ public class QuantaServe {
   }
 
   public static void main(String[] argv) throws Exception {
-    VectaraArgs args = new VectaraArgs();
+    AlphaArgs args = new AlphaArgs();
     JCommander.newBuilder().addObject(args).build().parse(argv);
-    System.exit(new QuantaServe(args).start());
+    System.exit(new AlphaServe(args).start());
   }
 }

@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="AlphaServe" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.vectara.examples.salpha.AlphaServe" />
+    <module name="quanta-magazine" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
